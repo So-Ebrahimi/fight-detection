@@ -11,8 +11,10 @@ class FightDataset(Dataset):
 
         for label, folder in enumerate(["fight", "noFight"]):
             path = os.path.join(root, folder)
-            for vid in os.listdir(path):
-                self.samples.append((os.path.join(path, vid), label))
+            if os.path.exists(path):
+                for vid in os.listdir(path):
+                    if vid.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
+                        self.samples.append((os.path.join(path, vid), label))
 
     def __len__(self):
         return len(self.samples)

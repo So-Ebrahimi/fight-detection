@@ -50,7 +50,7 @@ def predict_video(video_path, model, device):
     return pred, confidence
 
 # Test all videos
-dataset_path = "dataset"
+dataset_path = "dataset/test"
 fight_folder = os.path.join(dataset_path, "fight")
 noFight_folder = os.path.join(dataset_path, "noFight")
 
@@ -60,7 +60,7 @@ video_paths = []
 results = []
 
 print("\n" + "="*70)
-print("Testing all videos in dataset...")
+print("Testing all videos in TEST dataset...")
 print("="*70)
 
 # Test fight videos (label = 0)
