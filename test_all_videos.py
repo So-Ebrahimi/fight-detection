@@ -15,22 +15,45 @@ model.load_state_dict(torch.load("fight_model.pth", map_location=device))
 model.eval()
 
 def extract_frames(video_path, num_frames=16):
-    """Extract frames from video"""
+    """Extract frames uniformly from video"""
     cap = cv2.VideoCapture(video_path)
     frames = []
     
-    while len(frames) < num_frames:
+    if not cap.isOpened():
+        cap.release()
+        return np.zeros((num_frames, 224, 224, 3))
+    
+    # Get total frame count
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    if total_frames <= num_frames:
+        # If video has fewer frames, sample all
+        frame_indices = list(range(total_frames))
+    else:
+        # Sample uniformly across video
+        frame_indices = np.linspace(0, total_frames - 1, num_frames, dtype=int)
+    
+    # Extract frames at specified indices
+    for idx in frame_indices:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
         ret, frame = cap.read()
-        if not ret:
-            break
-        frame_resized = cv2.resize(frame, (224, 224)) / 255.0
-        frames.append(frame_resized)
+        if ret:
+            frame_resized = cv2.resize(frame, (224, 224)) / 255.0
+            frames.append(frame_resized)
+        else:
+            # If frame read fails, use last successful frame or zeros
+            if frames:
+                frames.append(frames[-1])
+            else:
+                frames.append(np.zeros((224, 224, 3)))
     
     cap.release()
     
-    # Pad with last frame if needed
+    # Ensure we have exactly num_frames
     while len(frames) < num_frames:
         frames.append(frames[-1] if frames else np.zeros((224, 224, 3)))
+    
+    frames = frames[:num_frames]  # Trim if too many
     
     return np.array(frames)
 
